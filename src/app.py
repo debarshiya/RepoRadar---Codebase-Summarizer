@@ -25,16 +25,36 @@ def handle_remove_readonly(func, path, exc):
     else:
         raise
 
+# def clone_repo(repo_url: str) -> str:
+#     """Clone a GitHub repository into the examples folder."""
+#     if not os.path.exists(EXAMPLES_DIR):
+#         os.makedirs(EXAMPLES_DIR)
+
+#     repo_name = repo_url.rstrip("/").split("/")[-1].replace(".git", "")
+#     dest_path = os.path.join(EXAMPLES_DIR, repo_name)
+
+#     if os.path.exists(dest_path):
+#         shutil.rmtree(dest_path, onerror=handle_remove_readonly)
+
+#     try:
+#         Repo.clone_from(repo_url, dest_path)
+#         return dest_path
+#     except Exception as e:
+#         raise RuntimeError(f"Failed to clone repository: {e}")
+    
 def clone_repo(repo_url: str) -> str:
-    """Clone a GitHub repository into the examples folder."""
+    """Clone a GitHub repository into the examples folder, replacing existing repos."""
     if not os.path.exists(EXAMPLES_DIR):
         os.makedirs(EXAMPLES_DIR)
+    else:
+        # Delete all existing repos inside examples/
+        for folder in os.listdir(EXAMPLES_DIR):
+            folder_path = os.path.join(EXAMPLES_DIR, folder)
+            if os.path.isdir(folder_path):
+                shutil.rmtree(folder_path, onerror=handle_remove_readonly)
 
     repo_name = repo_url.rstrip("/").split("/")[-1].replace(".git", "")
     dest_path = os.path.join(EXAMPLES_DIR, repo_name)
-
-    if os.path.exists(dest_path):
-        shutil.rmtree(dest_path, onerror=handle_remove_readonly)
 
     try:
         Repo.clone_from(repo_url, dest_path)
