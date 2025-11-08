@@ -4,18 +4,18 @@ Usage: streamlit run src/app.py
 """
 import streamlit as st
 from pathlib import Path
-from .parser import find_py_files, parse_file
-from .chunker import chunk_by_functions, chunk_text
-from .summarizer import summarize_chunks
-from .graph import build_graph, export_pyvis
-from .utils import save_json, load_json
+from parser import find_py_files, parse_file
+from chunker import chunk_by_functions, chunk_text
+from summarizer import summarize_chunks
+from graph import build_graph, export_pyvis
+from utils import save_json, load_json
 import os
 
 st.set_page_config(layout="wide", page_title="AutoDoc")
 
 st.title("AutoDoc — Codebase Summarizer")
 
-repo_path = st.text_input("Local repo path", value="examples/small_repo")
+repo_path = st.text_input("Local repo path", value="examples/covid19_interactive_repo")
 if st.button("Analyze repository"):
     p = Path(repo_path)
     if not p.exists():

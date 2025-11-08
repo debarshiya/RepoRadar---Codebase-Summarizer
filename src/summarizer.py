@@ -5,7 +5,7 @@ import os
 import time
 from pathlib import Path
 from typing import Dict, Optional
-from .utils import save_json, load_json
+from utils import save_json, load_json
 from tqdm import tqdm
 
 # Lazy import to avoid failing if openai not installed during linting
@@ -14,7 +14,7 @@ try:
 except Exception:
     openai = None
 
-CACHE_DIR = Path(".reporadar_cache/summaries")
+CACHE_DIR = Path(".autodoc_cache/summaries")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
