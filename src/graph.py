@@ -43,5 +43,6 @@ def export_pyvis(G: nx.DiGraph, out_path: Path = Path("autodoc_graph.html")):
         title = dd.get("kind", "")
         net.add_edge(u, v, title=title)
     net.toggle_physics(True)
-    net.show(str(out_path))
+    net.write_html(str(out_path), notebook=False)
+    # net.show(str(out_path))
     return out_path
