@@ -15,7 +15,7 @@ st.set_page_config(layout="wide", page_title="AutoDoc")
 
 st.title("AutoDoc — Codebase Summarizer")
 
-repo_path = st.text_input("Local repo path", value="examples/covid19_interactive_repo")
+repo_path = st.text_input("Local repo path", value="examples/micrograd")
 if st.button("Analyze repository"):
     p = Path(repo_path)
     if not p.exists():

@@ -2,24 +2,32 @@
 LLM summarizer wrapper + caching. Uses OpenAI python package as example.
 """
 import os
+from dotenv import load_dotenv
+
 import time
 from pathlib import Path
 from typing import Dict, Optional
 from utils import save_json, load_json
 from tqdm import tqdm
+from openai import OpenAI
 
-# Lazy import to avoid failing if openai not installed during linting
-try:
-    import openai
-except Exception:
-    openai = None
+load_dotenv()  
+
+# # Lazy import to avoid failing if openai not installed during linting
+# try:
+#     import openai
+# except Exception:
+#     openai = None
 
 CACHE_DIR = Path(".autodoc_cache/summaries")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
-API_KEY = os.environ.get("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")
-
+API_KEY = os.environ.get("OPENROUTER_API_KEY")
+# openai.api_key = API_KEY
+# openai.api_base = "https://openrouter.ai/api/v1"
+if not API_KEY:
+    raise RuntimeError("OPENROUTER_API_KEY not found in environment!")
 SYSTEM_PROMPT = """You are RepoRadar: an assistant that produces concise developer-friendly summaries and docstrings.
 Rules:
 - Provide a short one-line summary ( <= 20 words).
@@ -29,12 +37,17 @@ Rules:
 - If code appears incomplete or suspicious, add a note.
 Output JSON with keys: one_liner, description, inputs_outputs, docstring, notes.
 """
+client = OpenAI(
+    api_key=API_KEY,
+    base_url="https://openrouter.ai/api/v1"
+)
 
-def _client():
-    if openai is None:
-        raise RuntimeError("openai package not installed")
-    openai.api_key = API_KEY
-    return openai
+# def _client():
+#     if openai is None:
+#         raise RuntimeError("openai package not installed")
+#     openai.api_key = API_KEY
+#     openai.api_base = "https://openrouter.ai/api/v1"
+#     return openai
 
 def _cache_path_for(key: str) -> Path:
     safe = key.replace("/", "_").replace(" ", "_")[:200]
@@ -45,20 +58,28 @@ def summarize_text(text: str, key: str, max_retries: int = 3, temperature: float
     Summarize text using the configured LLM. Uses caching by key (e.g., file path + start line)
     """
     cp = _cache_path_for(key)
-    cached = load_json(cp)
-    if cached:
-        return cached
-    client = _client()
+    print("Checking cache at:", cp)
+    # cached = load_json(cp)
+    # if cached:
+    #     print("Found cached summary, skipping LLM")
+    #     return cached
+    # client = _client()
     prompt = SYSTEM_PROMPT + "\n\nCode:\n" + text + "\n\nRespond only with valid JSON."
     for attempt in range(max_retries):
         try:
-            resp = client.ChatCompletion.create(
+            print("Calling LLM for key:", key)
+            resp = client.chat.completions.create(
                 model=MODEL,
                 messages=[{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":text}],
+                extra_headers={
+                    "HTTP-Referer": "http://localhost",
+                    "X-Title": "RepoRadar",
+                },
                 temperature=temperature,
                 max_tokens=600
             )
-            out = resp["choices"][0]["message"]["content"].strip()
+            out = resp.choices[0].message.content
+            print("LLM output preview:", out[:300])
             # attempt parse JSON
             import json
             parsed = json.loads(out)
@@ -70,7 +91,16 @@ def summarize_text(text: str, key: str, max_retries: int = 3, temperature: float
             print("LLM error:", e)
             time.sleep(1 + attempt * 2)
     # fallback simple heuristic summary
-    fallback = {"one_liner": text.strip().splitlines()[0][:80], "description": "Auto-generated fallback summary.", "inputs_outputs": [], "docstring": "", "notes": "fallback used"}
+    # fallback = {"one_liner": text.strip().splitlines()[0][:80], "description": "Auto-generated fallback summary.", "inputs_outputs": [], "docstring": "", "notes": "fallback used"}
+    first_line = text.strip().splitlines()[0][:80] if text.strip().splitlines() else "No content available"
+    fallback = {
+        "one_liner": first_line,
+        "description": "Auto-generated fallback summary.",
+        "inputs_outputs": [],
+        "docstring": "",
+        "notes": "fallback used"
+    }
+
     save_json(cp, fallback)
     return fallback
 
