@@ -10,6 +10,89 @@ from summarizer import summarize_chunks
 from graph import build_graph, export_pyvis
 from utils import save_json, load_json
 import os
+import shutil
+import stat
+from git import Repo
+
+EXAMPLES_DIR = "examples"
+
+def handle_remove_readonly(func, path, exc):
+    """Fix for Windows read-only files (WinError 5) when deleting folder."""
+    excvalue = exc[1]
+    if func in (os.rmdir, os.remove, os.unlink):
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+    else:
+        raise
+
+def clone_repo(repo_url: str) -> str:
+    """Clone a GitHub repository into the examples folder."""
+    if not os.path.exists(EXAMPLES_DIR):
+        os.makedirs(EXAMPLES_DIR)
+
+    repo_name = repo_url.rstrip("/").split("/")[-1].replace(".git", "")
+    dest_path = os.path.join(EXAMPLES_DIR, repo_name)
+
+    if os.path.exists(dest_path):
+        shutil.rmtree(dest_path, onerror=handle_remove_readonly)
+
+    try:
+        Repo.clone_from(repo_url, dest_path)
+        return dest_path
+    except Exception as e:
+        raise RuntimeError(f"Failed to clone repository: {e}")
+
+# =============================
+# Streamlit UI
+# =============================
+st.set_page_config(page_title="AutoDoc – Codebase Summarizer", layout="wide")
+st.title("🧠 AutoDoc – Codebase Summarizer")
+
+st.markdown(
+    """
+    Paste a **GitHub repository link** below to automatically clone it into the `examples/` folder.
+    All existing functionality (summarizer, chunker, parser, graph) remains unchanged.
+    """
+)
+
+# ----------------------------
+# GitHub repository cloning
+# ----------------------------
+repo_url = st.text_input("🔗 GitHub Repository URL", placeholder="https://github.com/username/repo-name")
+
+if st.button("🚀 Clone Repository"):
+    if repo_url.strip():
+        with st.spinner("Cloning repository..."):
+            try:
+                repo_path = clone_repo(repo_url.strip())
+                st.success(f"✅ Repository cloned successfully to `{repo_path}`")
+
+                # ===================================================
+                # Use 'repo_path' with your existing functionality
+                # ===================================================
+                # Example placeholders for your current workflow:
+                # parsed_data = parser.parse_repo(repo_path)
+                # chunks = chunker.create_chunks(parsed_data)
+                # summaries = summarizer.summarize(chunks)
+                # graph.generate(parsed_data)
+                #
+                # Nothing else needs to be changed — just pass 'repo_path'.
+
+            except Exception as e:
+                st.error(f"❌ {e}")
+    else:
+        st.warning("⚠️ Please enter a valid GitHub repository URL.")
+
+# ----------------------------
+# Show already cloned repositories
+# ----------------------------
+st.markdown("### 📁 Already Cloned Repositories")
+if os.path.exists(EXAMPLES_DIR):
+    repos = os.listdir(EXAMPLES_DIR)
+    if repos:
+        st.write(repos)
+    else:
+        st.write("No repositories cloned yet.")
 
 st.set_page_config(layout="wide", page_title="AutoDoc")
 
