@@ -59,10 +59,10 @@ def summarize_text(text: str, key: str, max_retries: int = 3, temperature: float
     """
     cp = _cache_path_for(key)
     print("Checking cache at:", cp)
-    # cached = load_json(cp)
-    # if cached:
-    #     print("Found cached summary, skipping LLM")
-    #     return cached
+    cached = load_json(cp)
+    if cached:
+        print("Found cached summary, skipping LLM")
+        return cached
     # client = _client()
     prompt = SYSTEM_PROMPT + "\n\nCode:\n" + text + "\n\nRespond only with valid JSON."
     for attempt in range(max_retries):
@@ -107,7 +107,7 @@ def summarize_text(text: str, key: str, max_retries: int = 3, temperature: float
 def summarize_chunks(chunks, repo_prefix="repo"):
     results = []
     for i, ch in enumerate(tqdm(chunks)):
-        key = f"{repo_prefix}_{ch.get('type')}_{ch.get('name')}_{i}"
+        key = f"{repo_prefix}_{ch.get('file_path')}_{ch.get('type')}_{ch.get('name')}_{i}"
         summary = summarize_text(ch["text"], key=key)
         results.append({"chunk": ch, "summary": summary})
     return results

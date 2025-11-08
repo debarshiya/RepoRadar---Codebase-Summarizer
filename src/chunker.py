@@ -10,12 +10,12 @@ DEFAULT_CHUNK_CHARS = 3000  # tuneable
 def chunk_by_functions(parsed_file: Dict) -> List[Dict]:
     chunks = []
     for fn in parsed_file.get("functions", []):
-        chunks.append({"type": "function", "name": fn["name"], "text": fn["snippet"], "meta": {"start": fn["start"], "end": fn["end"]}})
+        chunks.append({"type": "function", "name": fn["name"], "text": fn["snippet"], "meta": {"start": fn["start"], "end": fn["end"]}, "file_path": parsed_file["path"]})
     for cl in parsed_file.get("classes", []):
-        chunks.append({"type": "class", "name": cl["name"], "text": cl["snippet"], "meta": {"start": cl["start"], "end": cl["end"]}})
+        chunks.append({"type": "class", "name": cl["name"], "text": cl["snippet"], "meta": {"start": cl["start"], "end": cl["end"]}, "file_path": parsed_file["path"]})
     # fallback: whole file chunk
     if not chunks:
-        chunks.append({"type": "file", "name": parsed_file["path"], "text": parsed_file["source"], "meta": {}})
+        chunks.append({"type": "file", "name": parsed_file["path"], "text": parsed_file["source"], "meta": {}, "file_path": parsed_file["path"]})
     return chunks
 
 def chunk_text(text: str, max_chars: int = DEFAULT_CHUNK_CHARS) -> List[str]:

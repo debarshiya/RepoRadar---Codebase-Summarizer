@@ -49,6 +49,15 @@ if st.session_state.get("parsed"):
             st.markdown(f"- **{fn['name']}** (calls: {', '.join(fn.get('calls',[]))})")
     with col2:
         st.header("Summaries")
+        if st.button("Summarize selected file"):
+            # only chunk the file selected in dropdown
+            chunks = chunk_by_functions(file_obj)
+            for ch in chunks:
+                ch["file_path"] = file_obj["path"]
+            results = summarize_chunks(chunks, repo_prefix=Path(repo_path).name)
+            st.session_state["summaries"] = results
+            save_json(Path(".autodoc_cache/summaries.json"), results)
+            st.success("Summaries generated for selected file")
         if st.button("Summarize all"):
             # create chunks from parsed files
             all_chunks = []
@@ -56,11 +65,12 @@ if st.session_state.get("parsed"):
             for pf in parsed:
                 chunks = chunk_by_functions(pf)
                 for ch in chunks:
+                    ch["file_path"] = pf["path"] 
                     all_chunks.append(ch)
             results = summarize_chunks(all_chunks, repo_prefix=Path(repo_path).name)
             st.session_state["summaries"] = results
             save_json(Path(".autodoc_cache/summaries.json"), results)
-            st.success("Summaries generated")
+            st.success("Summaries generated for all files in repo")
         if st.session_state.get("summaries"):
             for item in st.session_state["summaries"]:
                 ch = item["chunk"]
@@ -74,7 +84,7 @@ if st.session_state.get("parsed"):
                 with st.expander("View code snippet"):
                     st.code(ch["text"][:5000], language="python")
         else:
-            st.info("No summaries yet. Click 'Summarize all'.")
+            st.info("No summaries yet. Click a Summarize Button.")
     st.header("Dependency graph")
     if st.button("Build graph"):
         G = build_graph(parsed)
