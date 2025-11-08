@@ -24,23 +24,6 @@ def handle_remove_readonly(func, path, exc):
         func(path)
     else:
         raise
-
-# def clone_repo(repo_url: str) -> str:
-#     """Clone a GitHub repository into the examples folder."""
-#     if not os.path.exists(EXAMPLES_DIR):
-#         os.makedirs(EXAMPLES_DIR)
-
-#     repo_name = repo_url.rstrip("/").split("/")[-1].replace(".git", "")
-#     dest_path = os.path.join(EXAMPLES_DIR, repo_name)
-
-#     if os.path.exists(dest_path):
-#         shutil.rmtree(dest_path, onerror=handle_remove_readonly)
-
-#     try:
-#         Repo.clone_from(repo_url, dest_path)
-#         return dest_path
-#     except Exception as e:
-#         raise RuntimeError(f"Failed to clone repository: {e}")
     
 def clone_repo(repo_url: str) -> str:
     """Clone a GitHub repository into the examples folder, replacing existing repos."""
@@ -65,8 +48,8 @@ def clone_repo(repo_url: str) -> str:
 # =============================
 # Streamlit UI
 # =============================
-st.set_page_config(page_title="AutoDoc – Codebase Summarizer", layout="wide")
-st.title("🧠 AutoDoc – Codebase Summarizer")
+st.set_page_config(page_title="AutoDoc - Codebase Summarizer", layout="wide")
+st.title("AutoDoc - Codebase Summarizer")
 
 st.markdown(
     """
@@ -78,35 +61,46 @@ st.markdown(
 # ----------------------------
 # GitHub repository cloning
 # ----------------------------
-repo_url = st.text_input("🔗 GitHub Repository URL", placeholder="https://github.com/username/repo-name")
+repo_url = st.text_input("GitHub Repository URL", placeholder="https://github.com/username/repo-name")
 
-if st.button("🚀 Clone Repository"):
+# if st.button("Clone Repository"):
+#     if repo_url.strip():
+#         with st.spinner("Cloning repository..."):
+#             try:
+#                 repo_path = clone_repo(repo_url.strip())
+#                 st.success(f"Repository cloned successfully to `{repo_path}`")
+
+#                 # ===================================================
+#                 # Use 'repo_path' with your existing functionality
+#                 # ===================================================
+#                 # Example placeholders for your current workflow:
+#                 # parsed_data = parser.parse_repo(repo_path)
+#                 # chunks = chunker.create_chunks(parsed_data)
+#                 # summaries = summarizer.summarize(chunks)
+#                 # graph.generate(parsed_data)
+#                 #
+#                 # Nothing else needs to be changed — just pass 'repo_path'.
+
+#             except Exception as e:
+#                 st.error(f"{e}")
+#     else:
+#         st.warning("Please enter a valid GitHub repository URL.")
+
+# After a repo is successfully cloned:
+if st.button("Clone Repository"):
     if repo_url.strip():
         with st.spinner("Cloning repository..."):
             try:
                 repo_path = clone_repo(repo_url.strip())
-                st.success(f"✅ Repository cloned successfully to `{repo_path}`")
-
-                # ===================================================
-                # Use 'repo_path' with your existing functionality
-                # ===================================================
-                # Example placeholders for your current workflow:
-                # parsed_data = parser.parse_repo(repo_path)
-                # chunks = chunker.create_chunks(parsed_data)
-                # summaries = summarizer.summarize(chunks)
-                # graph.generate(parsed_data)
-                #
-                # Nothing else needs to be changed — just pass 'repo_path'.
-
+                st.success(f"Repository cloned successfully to `{repo_path}`")
+                st.session_state["last_repo_path"] = repo_path
             except Exception as e:
-                st.error(f"❌ {e}")
-    else:
-        st.warning("⚠️ Please enter a valid GitHub repository URL.")
+                st.error(f"{e}")
 
 # ----------------------------
 # Show already cloned repositories
 # ----------------------------
-st.markdown("### 📁 Already Cloned Repositories")
+st.markdown("### Already Cloned Repositories")
 if os.path.exists(EXAMPLES_DIR):
     repos = os.listdir(EXAMPLES_DIR)
     if repos:
@@ -118,7 +112,9 @@ st.set_page_config(layout="wide", page_title="AutoDoc")
 
 st.title("AutoDoc — Codebase Summarizer")
 
-repo_path = st.text_input("Local repo path", value="examples/micrograd")
+# repo_path = st.text_input("Local repo path", value="examples/micrograd")
+default_path = st.session_state.get("last_repo_path", "examples/micrograd")
+repo_path = st.text_input("Local repo path", value=default_path)
 if st.button("Analyze repository"):
     p = Path(repo_path)
     if not p.exists():
