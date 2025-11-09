@@ -14,6 +14,17 @@ import shutil
 import stat
 from git import Repo
 
+for key in list(st.session_state.keys()):
+    del st.session_state[key]
+
+import shutil
+from pathlib import Path
+
+CACHE_DIR = Path(".reporadar_cache")
+if CACHE_DIR.exists():
+    shutil.rmtree(CACHE_DIR)
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
 EXAMPLES_DIR = "examples"
 
 def handle_remove_readonly(func, path, exc):
