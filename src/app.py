@@ -1,5 +1,5 @@
 """
-Small Streamlit app to run autodoc over a local repo and explore results.
+Small Streamlit app to run RepoRadar over a local repo and explore results.
 Usage: streamlit run src/app.py
 """
 import streamlit as st
@@ -48,8 +48,8 @@ def clone_repo(repo_url: str) -> str:
 # =============================
 # Streamlit UI
 # =============================
-st.set_page_config(page_title="AutoDoc - Codebase Summarizer", layout="wide")
-st.title("AutoDoc - Codebase Summarizer")
+st.set_page_config(page_title="RepoRadar - Codebase Summarizer", layout="wide")
+st.title("RepoRadar - Codebase Summarizer")
 
 st.markdown(
     """
@@ -108,9 +108,9 @@ if os.path.exists(EXAMPLES_DIR):
     else:
         st.write("No repositories cloned yet.")
 
-st.set_page_config(layout="wide", page_title="AutoDoc")
+st.set_page_config(layout="wide", page_title="RepoRadar")
 
-st.title("AutoDoc — Codebase Summarizer")
+st.title("RepoRadar — Codebase Summarizer")
 
 # repo_path = st.text_input("Local repo path", value="examples/micrograd")
 default_path = st.session_state.get("last_repo_path", "examples/micrograd")
@@ -126,11 +126,11 @@ if st.button("Analyze repository"):
         for f in files:
             parsed.append(parse_file(f))
         st.session_state["parsed"] = parsed
-        save_json(Path(".autodoc_cache/parsed.json"), parsed)
+        save_json(Path(".reporadar_cache/parsed.json"), parsed)
         st.success("Parsed files — you can now generate summaries and graph")
 
 if "parsed" not in st.session_state:
-    parsed_cache = Path(".autodoc_cache/parsed.json")
+    parsed_cache = Path(".reporadar_cache/parsed.json")
     if parsed_cache.exists():
         st.session_state["parsed"] = load_json(parsed_cache)
 
@@ -155,7 +155,7 @@ if st.session_state.get("parsed"):
                 ch["file_path"] = file_obj["path"]
             results = summarize_chunks(chunks, repo_prefix=Path(repo_path).name)
             st.session_state["summaries"] = results
-            save_json(Path(".autodoc_cache/summaries.json"), results)
+            save_json(Path(".reporadar_cache/summaries.json"), results)
             st.success("Summaries generated for selected file")
         if st.button("Summarize all"):
             # create chunks from parsed files
@@ -168,7 +168,7 @@ if st.session_state.get("parsed"):
                     all_chunks.append(ch)
             results = summarize_chunks(all_chunks, repo_prefix=Path(repo_path).name)
             st.session_state["summaries"] = results
-            save_json(Path(".autodoc_cache/summaries.json"), results)
+            save_json(Path(".reporadar_cache/summaries.json"), results)
             st.success("Summaries generated for all files in repo")
         if st.session_state.get("summaries"):
             for item in st.session_state["summaries"]:
@@ -187,7 +187,7 @@ if st.session_state.get("parsed"):
     st.header("Dependency graph")
     if st.button("Build graph"):
         G = build_graph(parsed)
-        path = export_pyvis(G, out_path=Path(".autodoc_cache/autodoc_graph.html"))
+        path = export_pyvis(G, out_path=Path(".reporadar_cache/reporadar_graph.html"))
         st.write("Graph exported to", path)
         # display inline
         html = open(path, "r", encoding="utf-8").read()

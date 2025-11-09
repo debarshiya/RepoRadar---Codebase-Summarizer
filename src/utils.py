@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict
 
-CACHE_DIR = Path(".autodoc_cache")
+CACHE_DIR = Path(".reporadar_cache")
 CACHE_DIR.mkdir(exist_ok=True)
 
 def load_json(path: Path) -> Any:
