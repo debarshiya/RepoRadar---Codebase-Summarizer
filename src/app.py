@@ -14,6 +14,11 @@ import shutil
 import stat
 from git import Repo
 
+CACHE_DIR = Path(".reporadar_cache")
+if CACHE_DIR.exists():
+    shutil.rmtree(CACHE_DIR)
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
 EXAMPLES_DIR = "examples"
 
 def handle_remove_readonly(func, path, exc):
@@ -63,29 +68,6 @@ st.markdown(
 # ----------------------------
 repo_url = st.text_input("GitHub Repository URL", placeholder="https://github.com/username/repo-name")
 
-# if st.button("Clone Repository"):
-#     if repo_url.strip():
-#         with st.spinner("Cloning repository..."):
-#             try:
-#                 repo_path = clone_repo(repo_url.strip())
-#                 st.success(f"Repository cloned successfully to `{repo_path}`")
-
-#                 # ===================================================
-#                 # Use 'repo_path' with your existing functionality
-#                 # ===================================================
-#                 # Example placeholders for your current workflow:
-#                 # parsed_data = parser.parse_repo(repo_path)
-#                 # chunks = chunker.create_chunks(parsed_data)
-#                 # summaries = summarizer.summarize(chunks)
-#                 # graph.generate(parsed_data)
-#                 #
-#                 # Nothing else needs to be changed — just pass 'repo_path'.
-
-#             except Exception as e:
-#                 st.error(f"{e}")
-#     else:
-#         st.warning("Please enter a valid GitHub repository URL.")
-
 # After a repo is successfully cloned:
 if st.button("Clone Repository"):
     if repo_url.strip():
@@ -113,7 +95,7 @@ st.set_page_config(layout="wide", page_title="RepoRadar")
 st.title("RepoRadar — Codebase Summarizer")
 
 # repo_path = st.text_input("Local repo path", value="examples/micrograd")
-default_path = st.session_state.get("last_repo_path", "examples/micrograd")
+default_path = st.session_state.get("last_repo_path", "examples/")
 repo_path = st.text_input("Local repo path", value=default_path)
 if st.button("Analyze repository"):
     p = Path(repo_path)
