@@ -1,5 +1,4 @@
 venv/
-.autodoc_cache/
 .reporadar_cache/
 examples/
 __pycache__/
