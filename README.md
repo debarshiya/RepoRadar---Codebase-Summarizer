@@ -1,4 +1,7 @@
-## How to Run RepoRadar
+## Link:
+http://reporadar-env.eba-5tdaynmy.us-east-1.elasticbeanstalk.com/
+
+## How to Run RepoRadar on LocalHost
 RepoRadar is designed to be easy to set up and run locally for any Python repository.
 Follow these simple steps to get started:
 1. Clone the Repo
