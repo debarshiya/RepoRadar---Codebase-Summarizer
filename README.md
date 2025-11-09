@@ -5,6 +5,7 @@ Follow these simple steps to get started:
 ```bash
 git clone https://github.com/<your-username>/RepoRadar.git
 cd RepoRadar
+```bash
 
 2. Set Up the Environment
 Create and activate a virtual environment (recommended):
@@ -12,11 +13,13 @@ Create and activate a virtual environment (recommended):
 python -m venv venv
 source venv/bin/activate    # on macOS/Linux
 venv\Scripts\activate       # on Windows
+```bash
 
 3. Install Dependencies
 Install all required Python packages:
 ```bash
 pip install -r requirements.txt
+```bash
 
 4. Add Your API Key
 RepoRadar uses an LLM for code summarization (OpenAI or OpenRouter).
@@ -24,11 +27,13 @@ Create a .env file in the project root and add your API key:
 ```bash
 # Example for OpenAI or OpenRouter
 OPENROUTER_API_KEY=your_api_key_here
+```bash
 
 5. Run the App
 Launch the Streamlit interface:
 ```bash
 streamlit run src/app.py
+```bash
 
 6. Explore Any Repository
 - Paste a GitHub repo link in the input box to clone it automatically to analyze an existing repo.
