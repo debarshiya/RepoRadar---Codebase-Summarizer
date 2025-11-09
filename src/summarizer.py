@@ -19,7 +19,7 @@ load_dotenv()
 # except Exception:
 #     openai = None
 
-CACHE_DIR = Path(".autodoc_cache/summaries")
+CACHE_DIR = Path(".reporadar_cache/summaries")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")

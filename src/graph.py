@@ -33,7 +33,7 @@ def build_graph(parsed_files: List[Dict]) -> nx.DiGraph:
                 G.add_edge(fn_node, target, kind="calls")
     return G
 
-def export_pyvis(G: nx.DiGraph, out_path: Path = Path("autodoc_graph.html")):
+def export_pyvis(G: nx.DiGraph, out_path: Path = Path("reporadar_graph.html")):
     net = Network(height="800px", width="100%", notebook=False, directed=True)
     for n, d in G.nodes(data=True):
         lbl = d.get("label", n)
