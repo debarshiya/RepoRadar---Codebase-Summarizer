@@ -9,7 +9,8 @@ from pathlib import Path
 from typing import Dict, Optional
 from utils import save_json, load_json
 from tqdm import tqdm
-from openai import OpenAI
+# from openai import OpenAI
+import google.generativeai as genai
 
 load_dotenv()  
 
@@ -22,7 +23,9 @@ load_dotenv()
 CACHE_DIR = Path(".autodoc_cache/summaries")
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+# MODEL = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+# MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash-lite")
+MODEL = os.environ.get("GEMINI_MODEL")
 API_KEY = os.environ.get("OPENROUTER_API_KEY")
 # openai.api_key = API_KEY
 # openai.api_base = "https://openrouter.ai/api/v1"
@@ -37,10 +40,12 @@ Rules:
 - If code appears incomplete or suspicious, add a note.
 Output JSON with keys: one_liner, description, inputs_outputs, docstring, notes.
 """
-client = OpenAI(
-    api_key=API_KEY,
-    base_url="https://openrouter.ai/api/v1"
-)
+# client = OpenAI(
+#     api_key=API_KEY,
+#     base_url="https://openrouter.ai/api/v1"
+# )
+
+genai.configure(api_key=API_KEY)
 
 # def _client():
 #     if openai is None:
@@ -68,17 +73,27 @@ def summarize_text(text: str, key: str, max_retries: int = 3, temperature: float
     for attempt in range(max_retries):
         try:
             print("Calling LLM for key:", key)
-            resp = client.chat.completions.create(
-                model=MODEL,
-                messages=[{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":text}],
-                extra_headers={
-                    "HTTP-Referer": "http://localhost",
-                    "X-Title": "RepoRadar",
-                },
-                temperature=temperature,
-                max_tokens=600
-            )
-            out = resp.choices[0].message.content
+            # resp = client.chat.completions.create(
+            #     model=MODEL,
+            #     messages=[{"role":"system","content":SYSTEM_PROMPT},{"role":"user","content":text}],
+            #     extra_headers={
+            #         "HTTP-Referer": "http://localhost",
+            #         "X-Title": "RepoRadar",
+            #     },
+            #     temperature=temperature,
+            #     max_tokens=600
+            # )
+            # out = resp.choices[0].message.content
+            model = genai.GenerativeModel(MODEL)
+            prompt = SYSTEM_PROMPT + "\n\nCode:\n" + text + "\n\nRespond only with valid JSON."
+
+            try:
+                response = model.generate_content(prompt)
+                out = response.text
+            except Exception as e:
+                print("Gemini error:", e)
+                time.sleep(1 + attempt * 2)
+
             print("LLM output preview:", out[:300])
             # attempt parse JSON
             import json
