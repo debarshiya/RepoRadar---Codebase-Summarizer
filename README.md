@@ -60,11 +60,11 @@ In short — it helps you *understand a repository in minutes instead of hours.*
 
 ## How we built it
 We built RepoRadar by combining **AST parsing, LLM summarization, and interactive visualization**:  
-- 🧩 Parsed Python files using `ast` and `asttokens` to extract structure and function relationships  
-- 🤖 Used OpenRouter’s LLM API (like *Microsoft Phi-3.5 Mini* and *GPT-4o Mini*) to summarize each code chunk  
-- 📊 Visualized dependencies with **PyVis** and **NetworkX**  
-- 🖥️ Built a stylish minimalistic and responsive UI with **Streamlit**  
-- 💾 Added caching for summaries to improve performance  
+- Parsed Python files using `ast` and `asttokens` to extract structure and function relationships  
+- Used OpenRouter’s LLM API (like *Microsoft Phi-3.5 Mini* and *GPT-4o Mini*) to summarize each code chunk  
+- Visualized dependencies with **PyVis** and **NetworkX**  
+- Built a stylish minimalistic and responsive UI with **Streamlit**  
+- Added caching for summaries to improve performance  
 
 ## Challenges we ran into
 - Handling **complex nested imports** and circular dependencies.  
